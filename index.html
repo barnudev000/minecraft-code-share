@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Minecraft Host Codes</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; }
+    input, button { padding: 10px; margin: 5px 0; width: 100%; }
+    #code-list { margin-top: 30px; }
+  </style>
+</head>
+<body>
+  <h2>Submit Your Minecraft Host Code</h2>
+  <input id="name" placeholder="Your name" required />
+  <input id="code" placeholder="Your host code" required />
+  <button onclick="submitCode()">Submit</button>
+
+  <div id="code-list">
+    <h3>Current Host Codes</h3>
+    <ul id="codes"></ul>
+  </div>
+
+  <script>
+    async function submitCode() {
+      const name = document.getElementById("name").value;
+      const code = document.getElementById("code").value;
+      if (!name || !code) return alert("Please fill in both fields.");
+
+      await fetch("/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, code })
+      });
+
+      document.getElementById("code").value = "";
+      loadCodes();
+    }
+
+    async function loadCodes() {
+      const res = await fetch("/codes");
+      const data = await res.json();
+      const list = document.getElementById("codes");
+      list.innerHTML = "";
+      for (const [name, code] of Object.entries(data)) {
+        const li = document.createElement("li");
+        li.textContent = `${name}: ${code}`;
+        list.appendChild(li);
+      }
+    }
+
+    setInterval(loadCodes, 5000);
+    loadCodes();
+  </script>
+</body>
+</html>
